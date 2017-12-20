@@ -104,10 +104,13 @@ def run(img, resolution, show_graphs=False, verbose=False):
 
 if __name__ == '__main__':
     for img_path, result, resolution in tests:
+
         print('Testing {}'.format(img_path))
         if not os.path.isfile(img_path):
             raise ValueError('Image designated by path "{}" does not exist.'.format(img_path))
+
         img = cv.imread(img_path, 0)
+        
         if not result == 'skip':
             assert run(img, resolution) == result
             print('---PASS: [{}]---\n'.format(img_path))
