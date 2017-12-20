@@ -58,3 +58,5 @@ docs/_build/
 target/
 
 map_testing\.psd
+
+\.vscode/settings\.json
