@@ -1,4 +1,4 @@
-# fortmap [WIP]
+# fortroute-mapper [WIP]
 
 Fortmap is a python program designed to use the in-game minimap to record your location throughout a match of Fornite Battle Royale, in order to display your route through the match, for record keeping!
 
