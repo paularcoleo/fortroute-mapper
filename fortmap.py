@@ -3,19 +3,19 @@ from PIL import Image, ImageGrab
 import numpy as np
 import matplotlib.pyplot as plt
 
-RESOLUTION = '1920 x 1080'
+RESOLUTION = '1920x1080'
 
 TEST_FULL_SIZE = (110, 110)
 MAP_FULL_SIZE = (896, 896)
 
-subregion = {
-    '1920 x 1080': (25, 305, 1615, 1895),
+SUBREGION = {
+    '1920x1080': (1615, 1895, 25, 305),
 }
 
-tests = [
+TESTS = [
     ('test_images/test_01_full.jpg', (206, 557)),
     ('test_images/test_02_full.jpg', (491, 557)),
-    ('test_images/test_03_full.jpg', (545, 485)), 
+    ('test_images/test_03_full.jpg', (545, 485)),
     ('test_images/test_04_full.jpg', (520, 373)),
     ('test_images/test_05_full.jpg', (425, 401)),
     ('test_images/test_06_full.jpg', (499, 325)),
@@ -26,7 +26,7 @@ def run():
     full_map = cv.imread('full_map.png', 0)
     full_input = cv.imread('test_images/test_07_full.jpg', 0)
 
-    y1, y2, x1, x2 = subregion[RESOLUTION]
+    x1, x2, y1, y2 = SUBREGION[RESOLUTION]
     test_sq = full_input[y1:y2, x1:x2]
 
     cv.imshow('cropped', test_sq)
@@ -55,10 +55,10 @@ def run():
         cv.rectangle(template, top_left, bottom_right, 255, 5)
         print(int((top_left[0] + bottom_right[0])/2), int((top_left[1] + bottom_right[1]) /2))
         plt.subplot(121)
-        plt.imshow(img,cmap = 'gray')
+        plt.imshow(img, cmap='gray')
         plt.title('Input Image'), plt.xticks([]), plt.yticks([])
         plt.subplot(122)
-        plt.imshow(template ,cmap = 'gray')
+        plt.imshow(template, cmap='gray')
         plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
         plt.suptitle(meth)
         plt.show()
@@ -90,4 +90,3 @@ def run():
 
 if __name__ == '__main__':
     run()
-    make_a_map()
