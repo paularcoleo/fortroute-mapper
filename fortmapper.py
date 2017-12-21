@@ -3,9 +3,11 @@ from PIL import Image, ImageGrab
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
-import os
+import os, sys, time
+from datetime import datetime
 
 from tests import tests
+
 
 MY_RESOLUTION = '1920x1080'
 METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
@@ -35,11 +37,11 @@ def plot_result(img, template, tl, br, method):
 
 def determine_final_result(results):
     if len(results) > 2:
-        print('No Consensus')
+        # print('No Consensus')
         final_result = None
     else:
         final_result = results.most_common()[0][0]
-        print('Consensus reached:', final_result)
+        # print('Consensus reached:', final_result)
     return final_result
 
 
@@ -48,8 +50,8 @@ def run(img, resolution, show_graphs=False, verbose=False):
         raise ValueError('Resolution not supported.')
 
     full_map = cv.imread('full_map.png', 0)
-    test_sq = get_minimap(img, resolution)
-    test_sq = cv.resize(test_sq, TEST_SIZE)
+    # test_sq = get_minimap(img, resolution)
+    test_sq = cv.resize(img, TEST_SIZE)
 
     results = Counter()
     for meth in METHODS:
@@ -66,56 +68,82 @@ def run(img, resolution, show_graphs=False, verbose=False):
 
         res_x, res_y = int(top_left[0] + TEST_SIZE[0]/2), int(top_left[1] + TEST_SIZE[1]/2)
 
-        if verbose:
-            print(res_x, res_y, meth)
+        # if verbose:
+            # print(res_x, res_y, meth)
         results[(res_x, res_y)] += 1
         if meth == 'cv.TM_CCOEFF' and show_graphs:
             plot_result(img, template, top_left, bottom_right, meth)
-           
+
+    if verbose:
+        print(results)
     return determine_final_result(results)
+  
 
+def make_a_map(points):
+    your_map = cv.imread('full_map.png', 1)
 
-    
+    for i, point in enumerate(points):
+        if i == 0:
+            continue
+        if point == points[-1]:
+            break
+        else:
+            next_point = points[i+1]
+        cv.line(your_map, point, next_point, (0,100,255), 5)
 
-# def make_a_map():
-#     points = [
-#         (491, 557),
-#         (545, 485),
-#         (520, 373),
-#         (425, 401),
-#         (499, 325),
-#         (576, 307),
-#     ]
-
-#     your_map = cv.imread('full_map.png', 1)
-
-#     for i, point in enumerate(points):
-#         if point == points[-1]:
-#             break
-#         else:
-#             next_point = points[i+1]
-#         cv.line(your_map, point, next_point, (255,100,0), 2)
-
-#     your_map = cv.cvtColor(your_map, cv.COLOR_BGR2RGB)
-#     plt.imshow(your_map)
-#     plt.show()
+    # your_map = cv.cvtColor(your_map, cv.COLOR_BGR2RGB)
+    cv.imwrite('./tmp/map-{}.png'.format(datetime.strftime(datetime.now(), '%M-%d-%d')), your_map)
 
 
 
 if __name__ == '__main__':
-    for img_path, result, resolution in tests:
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'test':
+            for img_path, result, resolution in tests:
 
-        print('Testing {}'.format(img_path))
-        if not os.path.isfile(img_path):
-            raise ValueError('Image designated by path "{}" does not exist.'.format(img_path))
+                print('Testing {}'.format(img_path))
+                if not os.path.isfile(img_path):
+                    raise ValueError('Image designated by path "{}" does not exist.'.format(img_path))
 
-        img = cv.imread(img_path, 0)
+                img = cv.imread(img_path, 0)
+                
+                if not result == 'skip':
+                    assert run(img, resolution) == result
+                    print('---PASS: [{}]---\n'.format(img_path))
+                else:
+                    print(run(img, resolution, show_graphs=True))
         
-        if not result == 'skip':
-            assert run(img, resolution) == result
-            print('---PASS: [{}]---\n'.format(img_path))
-        else:
-            print(run(img, resolution, show_graphs=True))
+        elif sys.argv[1] == 'capture':
+            i = 1
+            while(i):
+                im = ImageGrab.grab()
+                im2 = np.array(im) 
+                # Convert RGB to BGR 
+                im2 = im2[:, :, ::-1].copy() 
+                mmap = get_minimap(im2, MY_RESOLUTION)
+                cv.imwrite('./tmp/test_{}.png'.format(i), mmap)
+                print('.', end='', flush=True)
+                time.sleep(10)
+                i += 1
+
+
+        elif sys.argv[1] == 'analyze':
+            results = []
+            i = 1
+            while(os.path.isfile('./tmp/test_{}.png'.format(i))):
+                print('.', end='', flush=True)
+                img = cv.imread('./tmp/test_{}.png'.format(i), 0)
+                # print(i)
+                result = run(img, MY_RESOLUTION, verbose=False)
+                # print('')
+                if result:
+                    results.append(result)
+                i += 1
+            if results:
+                make_a_map(results)
+
+    else:
+        print('Specify a thing, dummy')
 
 
 # https://docs.opencv.org/trunk/d4/dc6/tutorial_py_template_matching.html

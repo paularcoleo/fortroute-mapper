@@ -60,3 +60,5 @@ target/
 map_testing\.psd
 
 \.vscode/settings\.json
+
+tmp/
