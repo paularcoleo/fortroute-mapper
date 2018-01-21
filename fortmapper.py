@@ -6,19 +6,24 @@ from collections import Counter
 import os, sys, time
 from datetime import datetime
 
+
+from settings import LOCATION_FOLDER
 from tests import tests
 
 
 MY_RESOLUTION = '1920x1080'
 METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
 
-TEST_SIZE = (110, 110)
-MAP_SIZE = (896, 896)
+
+TEST_SIZE = (133, 133)
+MAP_SIZE = (1010, 1010)
 
 SUBREGION = {
     '1920x1080': (1615, 1895, 25, 305),
     '1680x1050': (1383, 1656, 24, 297),
 }
+
+MAP_FILE = './fortnite_map.png'
 
 def get_minimap(img, resolution):
     x1, x2, y1, y2 = SUBREGION[resolution]
@@ -49,7 +54,7 @@ def run(img, resolution, show_graphs=False, verbose=False):
     if resolution not in SUBREGION.keys():
         raise ValueError('Resolution not supported.')
 
-    full_map = cv.imread('full_map.png', 0)
+    full_map = cv.imread(MAP_FILE, 0)
     # test_sq = get_minimap(img, resolution)
     test_sq = cv.resize(img, TEST_SIZE)
 
@@ -71,7 +76,7 @@ def run(img, resolution, show_graphs=False, verbose=False):
         # if verbose:
             # print(res_x, res_y, meth)
         results[(res_x, res_y)] += 1
-        if meth == 'cv.TM_CCOEFF' and show_graphs:
+        if method == 'cv.TM_CCOEFF' and show_graphs:
             plot_result(img, template, top_left, bottom_right, meth)
 
     if verbose:
@@ -79,19 +84,22 @@ def run(img, resolution, show_graphs=False, verbose=False):
     return determine_final_result(results)
   
 
-def make_a_map(points):
-    your_map = cv.imread('full_map.png', 1)
+def make_a_map(points, filename=None):
+    your_map = cv.imread(MAP_FILE, 1)
 
     for i, point in enumerate(points):
-        if i == 0:
-            continue
+        # if i == 0:
+        #     continue
         if point == points[-1]:
             break
         else:
             next_point = points[i+1]
-        cv.line(your_map, point, next_point, (0,100,255), 5)
+        cv.line(your_map, point, next_point, (0,100,255), 3)
 
     # your_map = cv.cvtColor(your_map, cv.COLOR_BGR2RGB)
+    if filename:
+        
+    else:
     cv.imwrite('./tmp/map-{}.png'.format(datetime.strftime(datetime.now(), '%M-%d-%d')), your_map)
 
 
@@ -108,7 +116,8 @@ if __name__ == '__main__':
                 img = cv.imread(img_path, 0)
                 
                 if not result == 'skip':
-                    assert run(img, resolution) == result
+                    # img = get_minimap(img, resolution)
+                    assert run(img, resolution, verbose=True, show_graphs=True) == result
                     print('---PASS: [{}]---\n'.format(img_path))
                 else:
                     print(run(img, resolution, show_graphs=True))
@@ -134,7 +143,7 @@ if __name__ == '__main__':
                 print('.', end='', flush=True)
                 img = cv.imread('./tmp/test_{}.png'.format(i), 0)
                 # print(i)
-                result = run(img, MY_RESOLUTION, verbose=False)
+                result = run(img, MY_RESOLUTION, verbose=False, show_graphs=False)
                 # print('')
                 if result:
                     results.append(result)
@@ -142,8 +151,26 @@ if __name__ == '__main__':
             if results:
                 make_a_map(results)
 
+        elif sys.argv[1] == 'gamestart':
+            results = []
+            i = 1
+            while(i):
+                im = ImageGrab.grab()
+                mmap = get_minimap(im, MY_RESOLUTION)
+                coord  = run(mmap, MY_RESOLUTION)
+                if coord:
+                    results.append(coord)
+
+
+
+        else:
+            filename = sys.argv[1]
+            img = cv.imread(filename, 0)
+            # img = get_minimap(img, resolution=MY_RESOLUTION)
+            output = run(img, MY_RESOLUTION, verbose=True, show_graphs=True)
+            print(output)
     else:
         print('Specify a thing, dummy')
 
 
-# https://docs.opencv.org/trunk/d4/dc6/tutorial_py_template_matching.html
+# https://docs.opencv.org/trunk/d4/dc6/tutorial_py_template_matching.htmlaa

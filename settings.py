@@ -1,0 +1,1 @@
+LCOATION_FOLDER = 'E:\streaming'
