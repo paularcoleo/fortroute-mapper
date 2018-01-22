@@ -14,13 +14,12 @@ from tests import tests
 MY_RESOLUTION = '1920x1080'
 METHODS = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
 
-
 TEST_SIZE = (133, 133)
 MAP_SIZE = (1010, 1010)
 
 SUBREGION = {
-    '1920x1080': (1615, 1895, 25, 305),
-    '1680x1050': (1383, 1656, 24, 297),
+    '1920x1080': (1615, 25, 1895, 305),
+    '1680x1050': (24, 1383, 297, 1656),
 }
 
 MAP_FILE = './fortnite_map.png'
@@ -55,7 +54,6 @@ def run(img, resolution, show_graphs=False, verbose=False):
         raise ValueError('Resolution not supported.')
 
     full_map = cv.imread(MAP_FILE, 0)
-    # test_sq = get_minimap(img, resolution)
     test_sq = cv.resize(img, TEST_SIZE)
 
     results = Counter()
@@ -73,10 +71,8 @@ def run(img, resolution, show_graphs=False, verbose=False):
 
         res_x, res_y = int(top_left[0] + TEST_SIZE[0]/2), int(top_left[1] + TEST_SIZE[1]/2)
 
-        # if verbose:
-            # print(res_x, res_y, meth)
         results[(res_x, res_y)] += 1
-        if method == 'cv.TM_CCOEFF' and show_graphs:
+        if method == cv.TM_CCOEFF and show_graphs:
             plot_result(img, template, top_left, bottom_right, meth)
 
     if verbose:
@@ -91,6 +87,7 @@ def make_a_map(points, filename=None):
         # if i == 0:
         #     continue
         if point == points[-1]:
+            cv.circle(your_map, point, 10, (0,100,255), -1)
             break
         else:
             next_point = points[i+1]
@@ -98,10 +95,16 @@ def make_a_map(points, filename=None):
 
     # your_map = cv.cvtColor(your_map, cv.COLOR_BGR2RGB)
     if filename:
-        
+        cv.imwrite(filename, your_map)
     else:
-    cv.imwrite('./tmp/map-{}.png'.format(datetime.strftime(datetime.now(), '%M-%d-%d')), your_map)
+        cv.imwrite('./tmp/map-{}.png'.format(datetime.strftime(datetime.now(), '%M-%d-%d')), your_map)
 
+
+def reset_current_map():
+    game_map = cv.imread(MAP_FILE, 1)
+    default = 'current_map.png'
+    cv.imwrite(os.path.join(LOCATION_FOLDER, default), game_map)
+    print('Map file reset.')
 
 
 if __name__ == '__main__':
@@ -151,17 +154,26 @@ if __name__ == '__main__':
             if results:
                 make_a_map(results)
 
-        elif sys.argv[1] == 'gamestart':
-            results = []
+        elif sys.argv[1] == 'start':
+            reset_current_map()
+            points = []
             i = 1
             while(i):
-                im = ImageGrab.grab()
-                mmap = get_minimap(im, MY_RESOLUTION)
-                coord  = run(mmap, MY_RESOLUTION)
+                im = ImageGrab.grab(bbox=SUBREGION[MY_RESOLUTION])
+                im2 = np.array(im, dtype='uint8')
+                # Convert BGR to GRAY for Template Matching
+                test = cv.cvtColor(im2, cv.COLOR_BGR2GRAY)
+                # break
+                coord = run(test, MY_RESOLUTION)
+                print(i, coord, len(points))
                 if coord:
-                    results.append(coord)
+                    points.append(coord)
+                make_a_map(points, filename=os.path.join(LOCATION_FOLDER, 'current_map.png'))
+                time.sleep(10)
+                i += 1
 
-
+        elif sys.argv[1] == 'reset':
+            reset_current_map()
 
         else:
             filename = sys.argv[1]
@@ -173,4 +185,4 @@ if __name__ == '__main__':
         print('Specify a thing, dummy')
 
 
-# https://docs.opencv.org/trunk/d4/dc6/tutorial_py_template_matching.htmlaa
+# https://docs.opencv.org/trunk/d4/dc6/tutorial_py_template_matching.html

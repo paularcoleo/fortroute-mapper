@@ -1,1 +1,1 @@
-LCOATION_FOLDER = 'E:\streaming'
+LOCATION_FOLDER = 'E:\streaming'
