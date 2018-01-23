@@ -1,6 +1,7 @@
 '''Fortroute Mapper takes screenshots of Fortnite BR minimap to map out a route through a match.'''
 
 import cv2
+import requests
 import numpy as np
 import os, sys, time
 from PIL import ImageGrab
@@ -15,11 +16,16 @@ SUBREGION = {
     '1680x1050': (24, 1383, 297, 1656),
 }
 MAP_FILE = './fortnite_map.png'
-MAP_GRAY = cv2.imread(MAP_FILE, 0)
-MAP_COLOR = cv2.imread(MAP_FILE, 1)
+BACKUP_MAP_FILE = 'https://raw.githubusercontent.com/paularcoleo/fortroute-mapper/master/fortnite_map.png'
 METHODS = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 
            'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF_NORMED']
 LINE_COLOR_BGR = (0,100,255)
+
+def reset_default_map():
+    img_data = requests.get(BACKUP_MAP_FILE).content
+    with open(MAP_FILE, 'wb') as handler:
+        handler.write(img_data)
+    print('Map reset from Github.')
 
 def grab_minimap():
     im = ImageGrab.grab(bbox=SUBREGION[MY_RESOLUTION])
@@ -50,7 +56,7 @@ def reset_current_map():
     game_map = cv2.imread(MAP_FILE, 1)
     default = 'current_map.png'
     cv2.imwrite(os.path.join(LOCATION_FOLDER, default), game_map)
-    print('Map file reset.')
+    print('Current map file reset.')
 
 def update_map(points):
     clr_map = MAP_COLOR.copy()
@@ -64,9 +70,18 @@ def update_map(points):
     cv2.imwrite(os.path.join(LOCATION_FOLDER, 'current_map.png'), clr_map)
 
 if __name__ == '__main__':
+    if not os.path.isfile(MAP_FILE):
+        reset_default_map()
+    MAP_GRAY = cv2.imread(MAP_FILE, 0)
+    MAP_COLOR = cv2.imread(MAP_FILE, 1)
     if len(sys.argv) > 1:
         if sys.argv[1] == 'start':
             reset_current_map()
+            print('Recording starting in ..')
+            for i in reversed(range(1,4)):
+                print(i, end=' ', flush=True)
+                time.sleep(1)
+            print('')
             points = []
             i = 1
             while(i):
