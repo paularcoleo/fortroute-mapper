@@ -6,14 +6,18 @@ import numpy as np
 import os, sys, time
 from PIL import ImageGrab
 from collections import Counter
-
 from settings import LOCATION_FOLDER, MY_RESOLUTION
 
 TEST_SIZE = (133, 133)
 MAP_SIZE = (1010, 1010)
 SUBREGION = {
     '1920x1080': (1615, 25, 1895, 305),
-    '1680x1050': (24, 1383, 297, 1656),
+    '1680x1050': (1383, 24, 1656, 297),
+    '1440x900': (1186, 21, 1419, 254),
+    '1366x768': (1149, 18, 1348, 217),
+    '1360x768': (1143, 18, 1342, 217),
+    '1280x800': (1054, 19, 1261, 226),
+    '1280x720': (1077, 17, 1263, 203),
 }
 MAP_FILE = './fortnite_map.png'
 BACKUP_MAP_FILE = 'https://raw.githubusercontent.com/paularcoleo/fortroute-mapper/master/fortnite_map.png'
@@ -78,7 +82,7 @@ if __name__ == '__main__':
         if sys.argv[1] == 'start':
             reset_current_map()
             print('Recording starting in ..')
-            for i in reversed(range(1,4)):
+            for i in reversed(range(1,6)):
                 print(i, end=' ', flush=True)
                 time.sleep(1)
             print('')
