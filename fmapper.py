@@ -12,7 +12,7 @@ from subregions import SUBREGION
 with open('settings.json', 'r') as f:
     settings = json.load(f)
 
-MY_RESOLUTION = settings['my_resolution']
+MY_RESOLUTION = settings['resolution']
 LOCATION_FOLDER = settings['location_folder']
 
 TEST_SIZE = (133, 133)

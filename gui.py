@@ -2,7 +2,7 @@ import sys
 import os
 import json
 
-from PyQt5.QtCore import QCoreApplication, Qt
+from PyQt5.QtCore import QCoreApplication, Qt, QTimer
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QStyleFactory
 from PyQt5.QtWidgets import QAction, QMessageBox, QCheckBox, QProgressBar, QLabel, QComboBox
@@ -17,6 +17,9 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 550, 300)
         self.setWindowTitle('Fortroute Mapper')
         self.setWindowIcon(QIcon('./favicon.ico'))
+        self.timer_on = False
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timer_action)
         self.load_settings()
         self.init_ui()
 
@@ -61,6 +64,11 @@ class Window(QMainWindow):
 
         self.map_container = QLabel(self)
         self.update_pixmap()
+
+        self.timer_button = QPushButton('START', self)
+        self.timer_button.move(10, 175)
+        self.timer_button.clicked.connect(self.toggle_timer)
+
         self.show()
 
 
@@ -93,6 +101,19 @@ class Window(QMainWindow):
         self.change_setting('location_folder', file_path)
         reset_current_map(folder_override=self.settings['location_folder'])
         self.update_pixmap()
+
+    def timer_action(self):
+        print('a time passed')
+
+    def toggle_timer(self):
+        if self.timer_on:
+            self.timer_on = False
+            self.timer.stop()
+            self.timer_button.setText('START')
+        else:
+            self.timer.start(5000)
+            self.timer_on = True
+            self.timer_button.setText('STOP')
 
 def run():
     app = QApplication(sys.argv)
