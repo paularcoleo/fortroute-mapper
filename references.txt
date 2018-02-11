@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/36606771/pyqt-how-do-i-update-a-label --  Qt.Timer

@@ -1,2 +1,0 @@
-LOCATION_FOLDER = 'E:\streaming'
-MY_RESOLUTION = '1920x1080'

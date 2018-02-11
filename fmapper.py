@@ -1,24 +1,22 @@
 '''Fortroute Mapper takes screenshots of Fortnite BR minimap to map out a route through a match.'''
 
 import cv2
+import json
 import requests
 import numpy as np
 import os, sys, time
 from PIL import ImageGrab
 from collections import Counter
-from settings import LOCATION_FOLDER, MY_RESOLUTION
+from subregions import SUBREGION
+
+with open('settings.json', 'r') as f:
+    settings = json.load(f)
+
+MY_RESOLUTION = settings['my_resolution']
+LOCATION_FOLDER = settings['location_folder']
 
 TEST_SIZE = (133, 133)
 MAP_SIZE = (1010, 1010)
-SUBREGION = {
-    '1920x1080': (1615, 25, 1895, 305),
-    '1680x1050': (1383, 24, 1656, 297),
-    '1440x900': (1186, 21, 1419, 254),
-    '1366x768': (1149, 18, 1348, 217),
-    '1360x768': (1143, 18, 1342, 217),
-    '1280x800': (1054, 19, 1261, 226),
-    '1280x720': (1077, 17, 1263, 203),
-}
 MAP_FILE = './fortnite_map.png'
 BACKUP_MAP_FILE = 'https://raw.githubusercontent.com/paularcoleo/fortroute-mapper/master/fortnite_map.png'
 METHODS = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 
@@ -56,10 +54,13 @@ def process_minimap(minimap):
 def determine_result(votes):
     return None if len(votes) > 2 else votes.most_common()[0][0]
 
-def reset_current_map():
+def reset_current_map(folder_override=''):
     game_map = cv2.imread(MAP_FILE, 1)
     default = 'current_map.png'
-    cv2.imwrite(os.path.join(LOCATION_FOLDER, default), game_map)
+    if folder_override:
+        cv2.imwrite(os.path.join(folder_override, default), game_map)
+    else:
+        cv2.imwrite(os.path.join(LOCATION_FOLDER, default), game_map)
     print('Current map file reset.')
 
 def update_map(points):
