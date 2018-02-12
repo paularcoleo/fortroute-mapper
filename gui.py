@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QAction, QMessageBox, QCheckBox, QProgressBar, QLabe
 from PyQt5.QtWidgets import QFileDialog
 
 from subregions import SUBREGION
+from settings import SettingsManager
 from fmapper import reset_current_map, record_point, update_map, save_map
 
 class Window(QMainWindow):
@@ -27,12 +28,9 @@ class Window(QMainWindow):
         keyboard.add_hotkey('ctrl+r', self.signal_timer_toggle)
         self.timer = QTimer()
         self.timer.timeout.connect(self.timer_action)
-        self.load_settings()
+        self.settings = SettingsManager.initialize_settings()
         self.init_ui()
-
-    def load_settings(self):
-        with open('settings.json', 'r') as f:
-            self.settings = json.load(f)
+        self.reset_map()
 
     def init_ui(self):
         boldFont = QFont()
@@ -98,13 +96,7 @@ class Window(QMainWindow):
         self.update_pixmap()
 
     def change_setting(self, setting, value):
-        with open('settings.json', 'r+') as f:
-            settings = json.load(f)
-            settings[setting] = value
-            f.seek(0)
-            json.dump(settings, f)
-            f.truncate()
-        self.load_settings()
+        self.settings = SettingsManager.change_setting(setting, value)
         
     def change_resolution(self, resolution):
         self.change_setting('resolution', resolution)

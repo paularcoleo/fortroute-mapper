@@ -10,8 +10,9 @@ from PIL import ImageGrab
 from collections import Counter
 from subregions import SUBREGION
 
-with open('settings.json', 'r') as f:
-    settings = json.load(f)
+from settings import SettingsManager
+
+settings = SettingsManager.initialize_settings()
 
 MY_RESOLUTION = settings['resolution']
 LOCATION_FOLDER = settings['location_folder']
