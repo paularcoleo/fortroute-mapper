@@ -3,7 +3,7 @@ import os
 import json
 
 from PyQt5.QtCore import QCoreApplication, Qt, QTimer
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QFont
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QStyleFactory
 from PyQt5.QtWidgets import QAction, QMessageBox, QCheckBox, QProgressBar, QLabel, QComboBox
 from PyQt5.QtWidgets import QFileDialog
@@ -14,7 +14,7 @@ from fmapper import reset_current_map, record_point, update_map, save_map
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.setGeometry(100, 100, 625, 450)
+        self.setGeometry(100, 100, 620, 450)
         self.setWindowTitle('Fortroute Mapper')
         self.setWindowIcon(QIcon('./favicon.ico'))
         self.timer_on = False
@@ -29,16 +29,19 @@ class Window(QMainWindow):
             self.settings = json.load(f)
 
     def init_ui(self):
+        boldFont = QFont()
+        boldFont.setBold(True)
         QApplication.setStyle(QStyleFactory.create('Fusion'))
 
         self.res_label = QLabel('Select Fortnite Resolution:', self)
+        self.res_label.setFont(boldFont)
         self.res_label.resize(150, 10)
-        self.res_label.move(10, 10)
+        self.res_label.move(20, 10)
 
         resolution_dropdown = QComboBox(self)
         for resolution in SUBREGION.keys():
             resolution_dropdown.addItem(resolution)
-        resolution_dropdown.move(10,30)
+        resolution_dropdown.move(20,30)
 
         index = resolution_dropdown.findText(self.settings['resolution'], Qt.MatchFixedString)
         if index >= 0:
@@ -47,19 +50,21 @@ class Window(QMainWindow):
         resolution_dropdown.activated[str].connect(self.change_resolution)
 
         self.output_label = QLabel('Select image output folder:', self)
+        self.output_label.setFont(boldFont)
         self.output_label.adjustSize()
-        self.output_label.move(10, 100)
+        self.output_label.move(20, 100)
 
         self.output_text = QLabel(self.settings['location_folder'], self)
         self.output_text.adjustSize()
-        self.output_text.move(10, 125)
+        self.output_text.move(20, 125)
 
         self.folder_selector = QPushButton('...', self)
-        self.folder_selector.move(20 + self.output_text.geometry().width(), 125)
+        self.folder_selector.move(30 + self.output_text.geometry().width(), 125)
         self.folder_selector.resize(20,15)
         self.folder_selector.clicked.connect(self.change_destination_folder)
 
         self.map_label = QLabel('Current Map:', self)
+        self.map_label.setFont(boldFont)
         self.map_label.adjustSize()
         self.map_label.move(200, 10)
 
@@ -67,11 +72,22 @@ class Window(QMainWindow):
         self.update_pixmap()
 
         self.timer_button = QPushButton('START', self)
-        self.timer_button.move(10, 175)
+        self.timer_button.move(40, 200)
         self.timer_button.clicked.connect(self.toggle_timer)
+
+        self.reset_button = QPushButton('RESET MAP', self)
+        self.reset_button.move(40, 240)
+        self.reset_button.clicked.connect(self.reset_map)
+
+        self.namelabel = QLabel('Made with love by abyssalheaven', self)
+        self.namelabel.adjustSize()
+        self.namelabel.move(20, 415)
 
         self.show()
 
+    def reset_map(self):
+        reset_current_map()
+        self.update_pixmap()
 
     def change_setting(self, setting, value):
         with open('settings.json', 'r+') as f:
