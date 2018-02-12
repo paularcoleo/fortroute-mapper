@@ -16,7 +16,7 @@ class Window(QMainWindow):
         super(Window, self).__init__()
         self.setGeometry(100, 100, 620, 450)
         self.setWindowTitle('Fortroute Mapper')
-        self.setWindowIcon(QIcon('./favicon.ico'))
+        self.setWindowIcon(QIcon('./img/favicon.ico'))
         self.timer_on = False
         self.points = []
         self.timer = QTimer()
@@ -114,7 +114,7 @@ class Window(QMainWindow):
             return
         self.output_text.setText(file_path)
         self.output_text.adjustSize()
-        self.folder_selector.move(20 + self.output_text.geometry().width(), 125)
+        self.folder_selector.move(30 + self.output_text.geometry().width(), 125)
         self.change_setting('location_folder', file_path)
         reset_current_map(folder_override=self.settings['location_folder'])
         self.update_pixmap()
