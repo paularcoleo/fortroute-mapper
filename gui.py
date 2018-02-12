@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import keyboard
 
 from PyQt5.QtCore import QCoreApplication, Qt, QTimer
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
@@ -17,8 +18,13 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 620, 485)
         self.setWindowTitle('Fortroute Mapper')
         self.setWindowIcon(QIcon('./img/favicon.ico'))
+        self.timer_should_be_on = False
         self.timer_on = False
         self.points = []
+        self.time_checker = QTimer()
+        self.time_checker.timeout.connect(self.check_for_timer)
+        self.time_checker.start(1000)
+        keyboard.add_hotkey('ctrl+r', self.signal_timer_toggle)
         self.timer = QTimer()
         self.timer.timeout.connect(self.timer_action)
         self.load_settings()
@@ -120,6 +126,13 @@ class Window(QMainWindow):
         self.change_setting('location_folder', file_path)
         reset_current_map(folder_override=self.settings['location_folder'])
         self.update_pixmap()
+
+    def signal_timer_toggle(self):
+        self.timer_should_be_on = not self.timer_should_be_on
+
+    def check_for_timer(self):
+        if (self.timer_should_be_on != self.timer_on):
+            self.toggle_timer()
 
     def timer_action(self):
         coord = record_point(print_coord=True)
