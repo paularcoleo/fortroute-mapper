@@ -132,7 +132,7 @@ class Window(QMainWindow):
 
     def check_for_timer(self):
         if (self.timer_should_be_on != self.timer_on):
-            self.toggle_timer()
+            self.toggle_timer(shortcut=True)
 
     def timer_action(self):
         coord = record_point(print_coord=True)
@@ -141,10 +141,12 @@ class Window(QMainWindow):
             update_map(self.points)
             self.update_pixmap()
 
-    def toggle_timer(self):
+    def toggle_timer(self, shortcut=False):
         if self.timer_on:
-            self.timer_on = False
             self.timer.stop()
+            self.timer_on = False
+            if not shortcut:
+                self.timer_should_be_on = False
             self.timer_button.setText('START')
             choice = QMessageBox.question(self, 'Save', 'Do you want to save this route map?', QMessageBox.Yes | QMessageBox.No)
             if choice == QMessageBox.Yes:
@@ -159,6 +161,8 @@ class Window(QMainWindow):
             self.points = []
             self.timer.start(5000)
             self.timer_on = True
+            if not shortcut:
+                self.timer_should_be_on = True
             self.timer_button.setText('STOP')
 
 def run():
