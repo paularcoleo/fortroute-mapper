@@ -9,15 +9,16 @@ from PyQt5.QtWidgets import QAction, QMessageBox, QCheckBox, QProgressBar, QLabe
 from PyQt5.QtWidgets import QFileDialog
 
 from subregions import SUBREGION
-from fmapper import reset_current_map
+from fmapper import reset_current_map, record_point, update_map, save_map
 
 class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.setGeometry(100, 100, 550, 300)
+        self.setGeometry(100, 100, 625, 450)
         self.setWindowTitle('Fortroute Mapper')
         self.setWindowIcon(QIcon('./favicon.ico'))
         self.timer_on = False
+        self.points = []
         self.timer = QTimer()
         self.timer.timeout.connect(self.timer_action)
         self.load_settings()
@@ -37,7 +38,7 @@ class Window(QMainWindow):
         resolution_dropdown = QComboBox(self)
         for resolution in SUBREGION.keys():
             resolution_dropdown.addItem(resolution)
-        resolution_dropdown.move(5,30)
+        resolution_dropdown.move(10,30)
 
         index = resolution_dropdown.findText(self.settings['resolution'], Qt.MatchFixedString)
         if index >= 0:
@@ -60,7 +61,7 @@ class Window(QMainWindow):
 
         self.map_label = QLabel('Current Map:', self)
         self.map_label.adjustSize()
-        self.map_label.move(275, 10)
+        self.map_label.move(200, 10)
 
         self.map_container = QLabel(self)
         self.update_pixmap()
@@ -86,10 +87,10 @@ class Window(QMainWindow):
 
     def update_pixmap(self):
         image_filepath = os.path.join(self.settings['location_folder'], 'current_map.png')
-        self.pixmap = QPixmap(image_filepath).scaledToWidth(250)
+        self.pixmap = QPixmap(image_filepath).scaledToWidth(400)
         self.map_container.setPixmap(self.pixmap)
         self.map_container.resize(self.pixmap.width(),self.pixmap.height())
-        self.map_container.move(275,30)
+        self.map_container.move(200,30)
 
     def change_destination_folder(self):
         file_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
@@ -103,14 +104,28 @@ class Window(QMainWindow):
         self.update_pixmap()
 
     def timer_action(self):
-        print('a time passed')
+        coord = record_point(print_coord=True)
+        if coord:
+            self.points.append(coord)
+            update_map(self.points)
+            self.update_pixmap()
 
     def toggle_timer(self):
         if self.timer_on:
             self.timer_on = False
             self.timer.stop()
             self.timer_button.setText('START')
+            choice = QMessageBox.question(self, 'Save', 'Do you want to save this route map?', QMessageBox.Yes | QMessageBox.No)
+            if choice == QMessageBox.Yes:
+                name, _  = QFileDialog.getSaveFileName(self, 'Save Route Map As...', filter='*.png')
+                if name:
+                    save_map(name)
+
         else:
+            print('Timer started - will record first point in 5 seconds.')
+            reset_current_map()
+            self.update_pixmap()
+            self.points = []
             self.timer.start(5000)
             self.timer_on = True
             self.timer_button.setText('STOP')
