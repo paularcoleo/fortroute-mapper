@@ -3,7 +3,7 @@ import os
 import json
 import keyboard
 
-from PyQt5.QtCore import QCoreApplication, Qt, QTimer
+from PyQt5.QtCore import QCoreApplication, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap, QFont, QImage
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QStyleFactory
 from PyQt5.QtWidgets import QAction, QMessageBox, QCheckBox, QProgressBar, QLabel, QComboBox
@@ -14,8 +14,10 @@ from settings import SettingsManager
 from fmapper import reset_current_map, record_point, update_map, save_map
 
 class Window(QMainWindow):
+    resized = pyqtSignal()
     def __init__(self):
         super(Window, self).__init__()
+        self.map_loc = (200,70)
         self.setGeometry(100, 100, 620, 485)
         self.setWindowTitle('Fortroute Mapper')
         self.setWindowIcon(QIcon('./img/favicon.ico'))
@@ -29,6 +31,7 @@ class Window(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.timer_action)
         self.settings = SettingsManager.initialize_settings()
+        self.resized.connect(self.update_pixmap)
         self.init_ui()
         self.reset_map()
 
@@ -91,6 +94,10 @@ class Window(QMainWindow):
 
         self.show()
 
+    def resizeEvent(self, event):
+        self.resized.emit()
+        return super(Window, self).resizeEvent(event)
+
     def reset_map(self):
         reset_current_map()
         self.update_pixmap()
@@ -101,15 +108,20 @@ class Window(QMainWindow):
     def change_resolution(self, resolution):
         self.change_setting('resolution', resolution)
 
+    def determine_map_resize(self):
+        loc_x, loc_y = self.map_loc
+        a = self.geometry().width() - 15 - loc_x
+        b = self.geometry().height() - 15 - loc_y
+        return min(a, b)
+
     def update_pixmap(self):
         image_filepath = os.path.join(self.settings['location_folder'], 'current_map.png')
-        self.pixmap = QPixmap(image_filepath).scaledToWidth(400)
+        self.pixmap = QPixmap(image_filepath).scaledToWidth(self.determine_map_resize())
         self.map_container.setPixmap(self.pixmap)
         self.map_container.resize(self.pixmap.width(),self.pixmap.height())
-        self.map_container.move(200,70)
+        self.map_container.move(*self.map_loc)
 
     def truncate_path_name(self, pathname):
-        print(len(pathname), pathname)
         if len(pathname) > 26:
             paths = pathname.split('/')
             new_path = paths[0] + '/.../' + paths[-1]
