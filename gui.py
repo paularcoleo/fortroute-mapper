@@ -69,7 +69,7 @@ class Window(QMainWindow):
         self.output_label.adjustSize()
         self.output_label.move(20, 190)
 
-        self.output_text = QLabel(self.settings['location_folder'], self)
+        self.output_text = QLabel(self.truncate_path_name(self.settings['location_folder']), self)
         self.output_text.adjustSize()
         self.output_text.move(20, 205)
 
@@ -108,11 +108,20 @@ class Window(QMainWindow):
         self.map_container.resize(self.pixmap.width(),self.pixmap.height())
         self.map_container.move(200,70)
 
+    def truncate_path_name(self, pathname):
+        print(len(pathname), pathname)
+        if len(pathname) > 26:
+            paths = pathname.split('/')
+            new_path = paths[0] + '/.../' + paths[-1]
+            return new_path
+        else:
+            return pathname
+
     def change_destination_folder(self):
         file_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         if not os.path.isdir(file_path):
             return
-        self.output_text.setText(file_path)
+        self.output_text.setText(self.truncate_path_name(file_path))
         self.output_text.adjustSize()
         self.folder_selector.move(30 + self.output_text.geometry().width(), 205)
         self.change_setting('location_folder', file_path)

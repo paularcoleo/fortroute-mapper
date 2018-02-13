@@ -3,7 +3,7 @@ import json
 
 class SettingsManager():
     default_settings = {
-        'location_folder': '',
+        'location_folder': os.getcwd().replace('\\', '/') + '/output',
         'resolution': '1920x1080'
     }
 
