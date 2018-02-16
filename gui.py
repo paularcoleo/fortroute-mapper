@@ -92,6 +92,11 @@ class Window(QMainWindow):
         self.reset_button.move(40, 320)
         self.reset_button.clicked.connect(self.reset_map)
 
+        self.auto_save = QCheckBox('Save on Stop?', self)
+        self.auto_save.move(40, 360)
+        self.auto_save.adjustSize()
+        self.auto_save.toggle()
+
         self.show()
 
     def resizeEvent(self, event):
@@ -161,11 +166,12 @@ class Window(QMainWindow):
             if not shortcut:
                 self.timer_should_be_on = False
             self.timer_button.setText('START')
-            choice = QMessageBox.question(self, 'Save', 'Do you want to save this route map?', QMessageBox.Yes | QMessageBox.No)
-            if choice == QMessageBox.Yes:
-                name, _  = QFileDialog.getSaveFileName(self, 'Save Route Map As...', filter='*.png')
-                if name:
-                    save_map(name)
+            if self.auto_save.checkState() == 2:
+                choice = QMessageBox.question(self, 'Save', 'Do you want to save this route map?', QMessageBox.Yes | QMessageBox.No)
+                if choice == QMessageBox.Yes:
+                    name, _  = QFileDialog.getSaveFileName(self, 'Save Route Map As...', filter='*.png')
+                    if name:
+                        save_map(name)
 
         else:
             print('Timer started - will record first point in 5 seconds.')
