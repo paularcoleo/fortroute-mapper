@@ -4,7 +4,8 @@ import json
 class SettingsManager():
     default_settings = {
         'location_folder': os.getcwd().replace('\\', '/') + '/output',
-        'resolution': '1920x1080'
+        'resolution': '1920x1080',
+        'auto_save': True
     }
 
     settings_file = 'settings.json'

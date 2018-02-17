@@ -27,7 +27,7 @@ class Window(QMainWindow):
         self.time_checker = QTimer()
         self.time_checker.timeout.connect(self.check_for_timer)
         self.time_checker.start(1000)
-        keyboard.add_hotkey('ctrl+r', self.signal_timer_toggle)
+        keyboard.add_hotkey('ctrl+shift+r', self.signal_timer_toggle)
         self.timer = QTimer()
         self.timer.timeout.connect(self.timer_action)
         self.settings = SettingsManager.initialize_settings()
@@ -95,7 +95,9 @@ class Window(QMainWindow):
         self.auto_save = QCheckBox('Save on Stop?', self)
         self.auto_save.move(40, 360)
         self.auto_save.adjustSize()
-        self.auto_save.toggle()
+        if self.settings['auto_save']:
+            self.auto_save.toggle()
+        self.auto_save.stateChanged.connect(self.change_autosave)
 
         self.show()
 
@@ -108,6 +110,8 @@ class Window(QMainWindow):
         self.update_pixmap()
 
     def change_setting(self, setting, value):
+        if setting == 'auto_save':
+            value = self.auto_save.checkState() == 2
         self.settings = SettingsManager.change_setting(setting, value)
         
     def change_resolution(self, resolution):
@@ -133,6 +137,9 @@ class Window(QMainWindow):
             return new_path
         else:
             return pathname
+
+    def change_autosave(self):
+        self.change_setting('auto_save', self.auto_save.checkState() == 2)
 
     def change_destination_folder(self):
         file_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
