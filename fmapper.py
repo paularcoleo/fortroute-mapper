@@ -37,8 +37,8 @@ def reset_default_map():
         handler.write(img_data)
     print('Map reset from Github.')
 
-def grab_minimap():
-    im = ImageGrab.grab(bbox=settings['minimap_resolution'])
+def grab_minimap(setting):
+    im = ImageGrab.grab(bbox=setting['minimap_region'])
     im2 = np.array(im, dtype='uint8')
     im3 = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
     return im3
@@ -89,8 +89,8 @@ def save_map(filename):
         copyfile(src_path, filename)
 
 
-def record_point(print_coord=False):
-    minimap = grab_minimap()
+def record_point(print_coord=False, setting=settings):
+    minimap = grab_minimap(setting)
     coord = determine_result(process_minimap(minimap))
     if print_coord:
         print(coord)

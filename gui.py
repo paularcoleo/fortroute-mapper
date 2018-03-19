@@ -160,7 +160,7 @@ class Window(QMainWindow):
             self.toggle_timer(shortcut=True)
 
     def timer_action(self):
-        coord = record_point(print_coord=True)
+        coord = record_point(print_coord=True, setting=self.settings)
         if coord:
             self.points.append(coord)
             update_map(self.points)
