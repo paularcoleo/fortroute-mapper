@@ -1,9 +1,20 @@
-SUBREGION = {
-    '1920x1080': (1615, 25, 1895, 305),
-    '1680x1050': (1383, 24, 1656, 297),
-    '1440x900': (1186, 21, 1419, 254),
-    '1366x768': (1149, 18, 1348, 217),
-    '1360x768': (1143, 18, 1342, 217),
-    '1280x800': (1054, 19, 1261, 226),
-    '1280x720': (1077, 17, 1263, 203),
-}
+import requests
+
+class SubregionManager():
+
+    @staticmethod
+    def get_available_resolutions():
+        r = requests.get('http://fortroute.com/subregions/available')
+        if r.status_code == 200:
+            return sorted(r.json(), reverse=True)
+        else:
+            return []
+    
+    @staticmethod
+    def get_minimap_subregion(resolution, hud_scale=100):
+        url = 'http://fortroute.com/subregions/minimap/{}/{}'.format(resolution, hud_scale)
+        r = requests.get(url)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            return []

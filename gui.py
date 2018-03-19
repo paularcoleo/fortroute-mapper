@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QSt
 from PyQt5.QtWidgets import QAction, QMessageBox, QCheckBox, QProgressBar, QLabel, QComboBox
 from PyQt5.QtWidgets import QFileDialog
 
-from subregions import SUBREGION
+from subregions import SubregionManager
 from settings import SettingsManager
 from fmapper import reset_current_map, record_point, update_map, save_map
 
@@ -57,7 +57,7 @@ class Window(QMainWindow):
         self.res_label.move(20, 100)
 
         resolution_dropdown = QComboBox(self)
-        for resolution in SUBREGION.keys():
+        for resolution in SubregionManager.get_available_resolutions():
             resolution_dropdown.addItem(resolution)
         resolution_dropdown.move(20,120)
 

@@ -8,8 +8,9 @@ import os, sys, time
 from shutil import copyfile
 from PIL import ImageGrab
 from collections import Counter
-from subregions import SUBREGION
 
+
+from subregions import SubregionManager
 from settings import SettingsManager
 
 settings = SettingsManager.initialize_settings()
@@ -37,7 +38,7 @@ def reset_default_map():
     print('Map reset from Github.')
 
 def grab_minimap():
-    im = ImageGrab.grab(bbox=SUBREGION[MY_RESOLUTION])
+    im = ImageGrab.grab(bbox=settings['minimap_resolution'])
     im2 = np.array(im, dtype='uint8')
     im3 = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
     return im3
