@@ -1,5 +1,6 @@
 import os
 import json
+import copy
 
 from subregions import SubregionManager
 
@@ -16,9 +17,7 @@ class SettingsManager():
 
     @staticmethod
     def reset_default_settings():
-        with open(SettingsManager.settings_file, 'w') as f:
-            json.dump(SettingsManager.default_settings, f)
-        return SettingsManager.default_settings
+        return SettingsManager.save_settings(SettingsManager.default_settings)
 
     @staticmethod
     def load_settings():
@@ -33,15 +32,28 @@ class SettingsManager():
             SettingsManager.reset_default_settings()
             return SettingsManager.default_settings
         else:
-            return SettingsManager.load_settings()
+            settings = SettingsManager.load_settings()
+            for key in SettingsManager.default_settings.keys():
+                if key not in settings.keys():
+                    print(f'Could not find setting for {key} - updating with default')
+                    settings = SettingsManager.change_setting(key, SettingsManager.default_settings[key])
+            return settings
+
+    @staticmethod
+    def save_settings(settings):
+        with open(SettingsManager.settings_file, 'w') as f:
+            json.dump(settings, f)
+        return settings
 
     @staticmethod
     def change_setting(setting, value):
         settings = SettingsManager.load_settings()
+        if setting == 'minimap_region':
+            value = SubregionManager.get_minimap_subregion(settings['resolution'], settings['hud_scale'])
         settings[setting] = value
+        print(f'Changing setting: {setting} to {value}')
         if setting == 'resolution':
             sub = SubregionManager.get_minimap_subregion(value, settings['hud_scale'])
             settings['minimap_region'] = sub
-        with open(SettingsManager.settings_file, 'w') as f:
-            json.dump(settings, f)
+        SettingsManager.save_settings(settings)
         return settings
