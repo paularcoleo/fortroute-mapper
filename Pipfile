@@ -13,6 +13,7 @@ numpy = "*"
 pillow = "*"
 keyboard = "*"
 "pyqt5" = "*"
+pylint = "*"
 
 
 [dev-packages]
