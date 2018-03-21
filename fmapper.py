@@ -89,8 +89,10 @@ def save_map(filename):
         copyfile(src_path, filename)
 
 
-def record_point(print_coord=False, setting=settings):
+def record_point(print_coord=False, setting=settings, show_one=False):
     minimap = grab_minimap(setting)
+    if show_one:
+        cv2.imwrite(os.path.join(LOCATION_FOLDER, 'test-show.png'), minimap)
     coord = determine_result(process_minimap(minimap))
     if print_coord:
         print(coord)
