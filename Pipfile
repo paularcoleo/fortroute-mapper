@@ -14,6 +14,7 @@ pillow = "*"
 keyboard = "*"
 "pyqt5" = "*"
 pylint = "*"
+birdseye = "*"
 
 
 [dev-packages]
